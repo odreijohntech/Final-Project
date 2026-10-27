@@ -1,141 +1,132 @@
-# 🎓 GradePilot — Advanced Analytics for Educational Performance Prediction
+# GradePilot
 
-> **ITTE 105b: Analytics Application** | Final Project
+<p align="center">
+  <img src="GradePilot%20Logo.png" alt="GradePilot — Advanced Analytics for Educational Performance Prediction" width="560" />
+</p>
 
-GradePilot is an analytics application that leverages machine learning to predict and analyze student academic performance. By examining key academic and demographic factors, GradePilot empowers educators and institutions to identify at-risk students early and make data-driven decisions to improve educational outcomes.
+> **ITTE 105b · Analytics Application · Final Project**
 
----
-
-## 📌 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Technologies Used](#technologies-used)
-- [Getting Started](#getting-started)
-- [How It Works](#how-it-works)
-- [Contributors](#contributors)
-- [License](#license)
-
----
-
-## Overview
-
-GradePilot addresses a critical challenge in education: understanding what factors influence student performance and predicting outcomes before it's too late to intervene. Using advanced analytics and predictive modeling, this application transforms raw student data into actionable insights.
-
-**Subject:** ITTE 105b — Analytics Application  
-**Project Type:** Final Project  
-**Institution:** [Your Institution Name]
-
----
+GradePilot is a student performance analytics app that estimates a student's final grade and highlights signals that may help guide early academic support. Enter a student profile to see an estimated grade, a pass/fail outlook, and suggested next steps.
 
 ## Features
 
-- 📊 **Exploratory Data Analysis (EDA)** — Visual breakdown of student performance trends and distributions
-- 🤖 **Performance Prediction** — Machine learning model that predicts student grades based on input features
-- 📈 **Interactive Analytics Dashboard** — Web-based app interface for exploring predictions and insights
-- 🔍 **Factor Analysis** — Identifies which variables (attendance, study habits, prior scores, etc.) most significantly impact performance
-- 📋 **At-Risk Detection** — Flags students who may need early academic intervention
+- Predicts a final grade on the dataset's 0–20 scale.
+- Labels estimates of **10/20 or higher as PASS** and lower estimates as **FAIL**.
+- Summarizes signals from recent grades, attendance, study time, and prior class failures.
+- Provides practical recommendations to support student check-ins.
+- Offers a responsive SvelteKit interface with light and dark themes.
+- Includes a notebook and a reproducible model-training script.
 
----
+Predictions are estimates for early-support conversations. They should be considered alongside educator knowledge and other relevant information.
 
-## Project Structure
+## Technology
 
+- **Frontend:** SvelteKit, Svelte 5, TypeScript, Tailwind CSS, Lucide icons
+- **API:** FastAPI, Pydantic
+- **Model:** scikit-learn `RandomForestRegressor` with a preprocessing pipeline
+- **Data processing:** pandas, NumPy
+- **Deployment:** Vercel Services configuration
+
+## Run locally
+
+### Requirements
+
+- Python 3.12
+- Node.js 22 or later and npm
+
+### 1. Install API dependencies
+
+From the repository root, create and activate a virtual environment in `app/`.
+
+**Windows PowerShell**
+
+```powershell
+cd app
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
-Final-Project/
-│
-├── .ipynb_checkpoints/               # Jupyter auto-save checkpoints
-│
-├── app/                              # Web application (dashboard/UI)
-│
-├── GradePilot_Advanced Analytics for
-│   Educational Performance
-│   Prediction_PPT.pptx              # Project presentation slides
-│
-├── GradePilot_Documentation.docx    # Full project documentation
-│
-├── LICENSE                          # MIT License
-└── README.md                        # Project overview (this file)
+
+**macOS / Linux**
+
+```bash
+cd app
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
----
+### 2. Start the API
 
-## Technologies Used
+Keep the virtual environment active and run this from the `app/` directory:
 
-| Category | Tools / Libraries |
-|---|---|
-| Language | Python |
-| Notebooks | Jupyter Notebook |
-| Data Analysis | Pandas, NumPy |
-| Visualization | Matplotlib, Seaborn |
-| Machine Learning | Scikit-learn |
-| Web App | *(refer to `app/` folder)* |
-| Documentation | Microsoft Word, PowerPoint |
+```bash
+python -m uvicorn server:app --host 127.0.0.1 --port 8002
+```
 
-> *Note: Specific library versions and full dependencies can be found inside the Jupyter Notebook files.*
+The API exposes `GET /api/predict` for its default input schema and `POST /api/predict` for a prediction. The API root (`/`) returns service status.
 
----
+### 3. Start the frontend
 
-## Getting Started
+In a second terminal, from the repository root:
 
-### Prerequisites
+```bash
+cd frontend
+npm ci
+npm run dev
+```
 
-Make sure you have the following installed:
+Open **http://127.0.0.1:8001/**. The frontend development server proxies `/api/*` requests to the API on port 8002.
 
-- Python 3.8+
-- Jupyter Notebook or JupyterLab
-- pip
+## Model and data
 
-### Installation
+The model estimates the dataset's `G3` final grade from 31 student, family, and study predictors. The `school` field is deliberately excluded from model inputs. The deployed pipeline preprocesses categorical inputs and fits a random forest regressor.
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Bas1CUBER/Final-Project.git
-   cd Final-Project
-   ```
+The training script combines the Mathematics and Portuguese student datasets, evaluates a held-out split, then fits a final model on the full data and saves it to `app/models/grade_model.pkl`.
 
-2. **Install required dependencies**
-   ```bash
-   pip install pandas numpy matplotlib seaborn scikit-learn
-   ```
+To retrain the model, install the API dependencies and run from `app/`:
 
-3. **Launch the Jupyter Notebook**
-   ```bash
-   jupyter notebook
-   ```
+```bash
+python train_models.py
+```
 
-4. **Run the web app** *(if applicable)*
-   ```bash
-   cd app
-   # Follow instructions inside the app folder
-   ```
+The script reports held-out mean absolute error, RMSE, R², and pass/fail accuracy. Results can vary if the data or training configuration changes.
 
----
+The dataset is available from [Kaggle's Student Performance dataset](https://www.kaggle.com/datasets/whenamancodes/student-performance). The dataset has its own attribution and license terms; see `app/README.md` for the project’s dataset note.
 
-## How It Works
+## Deployment
 
-1. **Data Collection** — Student data is gathered covering academic records and relevant demographic/behavioral factors.
-2. **Data Preprocessing** — Handles missing values, encodes categorical variables, and scales numerical features.
-3. **Exploratory Data Analysis** — Visual and statistical exploration to understand data patterns and correlations.
-4. **Model Training** — A machine learning model is trained to predict student performance scores or categories.
-5. **Evaluation** — Model is evaluated using metrics such as accuracy, R² score, and Mean Squared Error (MSE).
-6. **Deployment** — Predictions are surfaced through an interactive app interface for end-user access.
+The repository's `vercel.json` routes `/api/*` to the FastAPI service and other paths to the SvelteKit frontend. See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment and local environment details.
 
----
+## Repository layout
+
+```text
+.
+├── app/
+│   ├── datasets/          # Mathematics and Portuguese datasets
+│   ├── models/            # Trained grade prediction pipeline
+│   ├── assets/            # Legacy static UI files
+│   ├── feature_schema.py  # Shared model feature definitions
+│   ├── server.py          # FastAPI prediction API
+│   ├── train_models.py    # Model training and evaluation
+│   └── Untitled.ipynb     # Analysis notebook
+├── frontend/
+│   ├── src/               # SvelteKit application
+│   ├── static/            # Static files, including the favicon
+│   └── package.json
+├── DEPLOYMENT.md
+├── LICENSE
+└── README.md
+```
 
 ## Contributors
 
-| Name | Role |
-|---|---|
-| [Bas1CUBER](https://github.com/Bas1CUBER) | Developer |
-| *(Add other group members here)* | Developer |
-
----
+- PATAJO, Odrei John C.
+- DE LEON, Queenie A.
+- NOVELOZO, Racell Jay C.
+- MANAHAN, John Felix R.
+- OCHOCO, John Patrick B.
 
 ## License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
-> *Developed as a final project for ITTE 105b: Analytics Application.*
+The project code is licensed under the [MIT License](LICENSE). The student dataset is distributed under CC BY 4.0 according to the project documentation; retain its attribution when using it.
