@@ -3,7 +3,7 @@
 ## Stack
 
 - Frontend: SvelteKit, Svelte 5, TypeScript, Tailwind CSS, and Lucide icons.
-- API: FastAPI on Python 3.12, with the existing scikit-learn model files.
+- API: FastAPI on Python 3.12, with a scikit-learn grade-regression pipeline.
 - Hosting: two Vercel Services behind one deployment URL. `/api/*` goes to FastAPI; all other routes go to SvelteKit.
 
 ## Run locally
@@ -38,6 +38,8 @@ Open **http://127.0.0.1:8001/**. Vite proxies `/api/*` to the Python API on port
 1. Push the repository to the Git provider connected to Vercel.
 2. Import the repository with its repository root as the project root. Keep `vercel.json` at that root.
 3. Vercel builds `frontend/` and `app/` as separate services. The root rewrites send `/api/*` to FastAPI and the remaining paths to SvelteKit.
-4. Deploy. The model files are in `app/models/`; Python dependencies are in `app/requirements.txt`, and `app/.python-version` pins the runtime to 3.12.
+4. Deploy. The model is `app/models/grade_model.pkl`; Python dependencies are in `app/requirements.txt`, and `app/.python-version` pins the runtime to 3.12. Its training and feature schema are in `app/train_models.py` and `app/feature_schema.py`.
+
+The training script drops the source dataset's `school` column before fitting the model. It predicts the actual `G3` grade; the API derives PASS/FAIL from the predicted grade using a 10/20 threshold. Retrain with `python train_models.py` from `app/` if the model artifact needs to be regenerated.
 
 For a local Vercel-style run, install the Vercel CLI and run `vercel dev -L` from the repository root. Vercel Services are currently in beta; check the [Services guide](https://vercel.com/kb/guide/vercel-services) if your Vercel project does not recognize the `services` configuration.

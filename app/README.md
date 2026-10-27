@@ -1,52 +1,44 @@
 # GradePilot: Advanced Analytics for Educational Performance Prediction
 
 ## Project Overview
-GradePilot is an AI-powered web application designed to predict student performance in Mathematics and Portuguese courses. Using machine learning, it provides early identification of at-risk students, enabling educators to intervene before failure occurs. The system achieves 90.5% accuracy using a Random Forest model and a streamlined, user-friendly interface.
+GradePilot is an educational analytics application that estimates a student's final grade from academic, study, and wellbeing indicators. Its Random Forest regressor predicts the G3 final grade; the app labels estimates of 10/20 or higher as PASS. The source CSVs include a school column, but school is excluded from both model training and prediction inputs.
 
 ## Features
-- Binary Pass/Fail prediction (≥10 = Pass, <10 = Fail)
-- 17 essential input fields for student data
+- Estimated final grade on a 0–20 scale and pass/fail outlook (≥10 = Pass)
+- 31 dataset predictors, with school excluded
 - Real-time prediction and risk assessment
 - Actionable recommendations for improvement
-- Interactive web dashboard (HTML/CSS/JS)
+- Interactive SvelteKit dashboard with light and dark themes
 - FastAPI backend for ML inference
 - Docker-ready deployment
 
 ## Folder Structure
 ```
 app/
-├── assets/           # Frontend files (index.html, style.css, script.js)
+├── assets/           # Legacy static files; the API no longer serves these
 ├── datasets/         # Source data (Maths.csv, Portuguese.csv)
-├── models/           # Trained model files (rf_model.pkl, scaler.pkl, label_encoder.pkl)
+├── models/           # Trained grade regression pipeline
+├── feature_schema.py # Shared predictor list; school is excluded
+├── train_models.py   # Reproducible model training and evaluation
 ├── server.py         # FastAPI backend
 ├── requirements.txt  # Python dependencies
 ├── Untitled.ipynb    # Jupyter notebook (ML pipeline)
 ```
 
 ## Installation & Usage
-1. **Clone the repository**
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. **Run the app**:
-   ```bash
-   uvicorn server:app --reload
-   ```
-4. **Access the web interface**:
-   Open `localhost:8000` in your browser
+1. Install the Python dependencies from `app/` with `pip install -r requirements.txt`.
+2. Start the API from `app/` on port 8002: `uvicorn server:app --host 127.0.0.1 --port 8002`.
+3. In a second terminal, start the SvelteKit frontend from `frontend/` on port 8001: `npm run dev -- --host 127.0.0.1 --port 8001`.
+4. Open `http://127.0.0.1:8001/`. Port 8000 is left for the user's other project.
 
 ## Model Training
-- See `Untitled.ipynb` for full data analysis, preprocessing, model training, and evaluation.
-- The final Random Forest model is saved in `models/rf_model.pkl`.
+- Install dependencies from `requirements.txt`.
+- Run `python train_models.py` from this folder.
+- The script combines Maths and Portuguese data, excludes `school`, evaluates a held-out split, then saves `models/grade_model.pkl`.
+- The held-out estimate is reported in grade-point MAE and pass/fail accuracy. It can differ from results in the original analysis notebook.
 
 ## Deployment
-All static assets are served from the `assets/` folder.
-
-To deploy locally:
-1. Install dependencies: `pip install -r requirements.txt`
-2. Run the FastAPI server: `uvicorn server:app --reload`
-3. Open `localhost:8000` in your browser to access the app.
+The SvelteKit frontend and FastAPI API deploy as separate Vercel Services; see the repository-level `DEPLOYMENT.md` for local and Vercel instructions. The API root returns service status; the SvelteKit service owns the application interface.
 
 ## Dataset Source
 This project uses the Student Performance dataset from Kaggle:
