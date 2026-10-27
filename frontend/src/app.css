@@ -22,3 +22,5 @@
 .theme-button{width:40px;height:40px;padding:0;flex:none}
 .brand-mark{display:block;width:28px;height:28px;flex:none;object-fit:contain;transform:none}
 .app-shell{--accent:#226b4d;--accent-strong:#226b4d;--accent-soft:#e9f2ed;--good:#226b4d;--good-bg:#e8f2ec}
+.select-wrap select:invalid{color:var(--subtle)}
+.select-wrap select option{color:var(--text);background:var(--surface)}
