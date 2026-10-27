@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from pathlib import Path
 import joblib
 import pandas as pd
 import numpy as np
 # Minimal logging setup
+APP_DIR = Path(__file__).resolve().parent
 
 # These are the original 32 features (excluding G3 target)
 ORIGINAL_FEATURES = [
@@ -50,17 +52,17 @@ def classify_performance(binary_prediction: int):
 # Load only the 3 essential files: rf_model, scaler, and label_encoder
 try:
     # Load Random Forest model (primary model)
-    rf_model = joblib.load("models/rf_model.pkl")
+    rf_model = joblib.load(APP_DIR / "models" / "rf_model.pkl")
     
     # Load scaler 
-    scaler = joblib.load("models/scaler.pkl")
+    scaler = joblib.load(APP_DIR / "models" / "scaler.pkl")
     
     # Load label encoder
-    label_encoder = joblib.load("models/label_encoder.pkl")
+    label_encoder = joblib.load(APP_DIR / "models" / "label_encoder.pkl")
     
-    print("✅ Models loaded successfully")
+    print("Models loaded successfully")
 except Exception as e:
-    print(f"❌ Failed to load models: {e}")
+    print(f"Failed to load models: {e}")
     rf_model = None
     scaler = None
     label_encoder = None
@@ -118,16 +120,17 @@ app.add_middleware(
 )
 
 # Mount static files (for CSS and JS)
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+app.mount("/assets", StaticFiles(directory=APP_DIR / "assets"), name="assets")
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index():
     """Serve the main HTML interface"""
-    with open("assets/index.html", "r", encoding="utf-8") as f:
+    with open(APP_DIR / "assets" / "index.html", "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
 
 
 @app.get("/predict")
+@app.get("/api/predict")
 async def get_input_schema():
     """Get default student data schema for input"""
     return {
@@ -168,6 +171,7 @@ async def get_input_schema():
 
 
 @app.post("/predict")
+@app.post("/api/predict")
 def predict_student(data: StudentData):
     """
     Predict student's final grade and classify as pass/fail
@@ -253,4 +257,4 @@ def predict_student(data: StudentData):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8002)
