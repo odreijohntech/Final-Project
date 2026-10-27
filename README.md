@@ -1,7 +1,7 @@
 # GradePilot
 
 <p align="center">
-  <img src="GradePilot%20Logo.png" alt="GradePilot — Advanced Analytics for Educational Performance Prediction" width="560" />
+  <img src="frontend/static/favicon.svg" alt="GradePilot logo" width="96" />
 </p>
 
 > **ITTE 105b · Analytics Application · Final Project**
